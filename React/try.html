@@ -1,0 +1,122 @@
+<script>
+    $(document).ready(function () {
+        // Initially hide the conditional fields
+        $('.conditional-fields').hide();
+        //$(".select-clear_options").attr("hidden", true);
+
+        // Listen for changes in the checkbox state
+        $('#customCheck1').change(function () {
+            // Check if the checkbox is checked
+            if ($(this).is(':checked')) {
+                // Show the conditional fields when the checkbox is checked
+                $('.conditional-fields').show();
+            } else {
+                // Hide the conditional fields when the checkbox is unchecked
+                $('.conditional-fields').hide();
+            }
+        });
+
+        // Function to show or hide the dropdown for each filter
+        function toggleDropdown(show, container) {
+            var dropdown = container.find(".dropdown-content");
+            var clear_options = container.find(".select-clear_options");
+            if (show) {
+                dropdown.addClass("show");
+                clear_options.attr("hidden", false);
+            } else {
+                dropdown.removeClass("show");
+                clear_options.attr("hidden", true);
+            }
+        }
+
+        // Function to filter items based on search input for each filter
+        function filterItems(input, container) {
+            var filter = input.value.toLowerCase();
+            var items = container.find(".dropdown-content label");
+
+            var selectedCount = 0; // Initialize the selected checkbox count
+
+            items.each(function () {
+                var item = $(this);
+                if (item.text().toLowerCase().includes(filter)) {
+                    item.show();
+                } else {
+                    item.hide();
+                }
+            });
+        }
+
+        // Handle radio input changes
+        $(".dropdown-container input[type='radio']").change(function () {
+            var container = $(this).closest(".dropdown-container");
+            handleRadioFilter(container);
+        });
+
+        // Function to handle radio inputs and update the placeholder
+        function handleRadioFilter(container) {
+            var selectedRadio = container.find("input[type='radio']:checked");
+            var radioValue = selectedRadio.val();
+            var defaultPlaceholder = container.find('.search-input').data("default-placeholder");
+            var placeholderInput = container.find('.search-input');
+
+            if (radioValue) {
+                placeholderInput.attr("placeholder", radioValue);
+
+            } else {
+                placeholderInput.attr("placeholder", defaultPlaceholder);
+
+            }
+        }
+
+        // Close all dropdowns except the one you clicked
+        function closeOtherDropdowns(clickedContainer) {
+            $(".dropdown-container").each(function () {
+                if (!$(this).is(clickedContainer)) {
+                    toggleDropdown(false, $(this));
+                }
+            });
+        }
+
+        // Toggle the dropdown when clicking on the input for each filter
+        $(".search-input").click(function () {
+            var container = $(this).closest(".dropdown-container");
+            // Close all other dropdowns
+            closeOtherDropdowns(container);
+            toggleDropdown(true, container);
+        });
+
+        // Handle input and filtering for each filter
+        $(".search-input").on("input", function () {
+            var container = $(this).closest(".dropdown-container");
+            filterItems(this, container);
+        });
+
+        // Handle checkbox changes
+        $(".dropdown-container input[type='checkbox']").change(function () {
+            var container = $(this).closest(".dropdown-container");
+            var selectedCheckboxes = container.find("input[type='checkbox']:checked");
+            var selectedCount = selectedCheckboxes.length;
+            var placeholderInput = container.find('.search-input');
+            var defaultPlaceholder = container.find('.search-input').data("default-placeholder");
+
+            if (selectedCount > 0) {
+                placeholderInput.attr("placeholder", "Selected (" + selectedCount + ")");
+            } else {
+                placeholderInput.attr("placeholder", defaultPlaceholder);
+            }
+        });
+
+        // Prevent closing the dropdown when clicking on checkboxes or labels
+        $(".dropdown-content label").click(function (event) {
+            event.stopPropagation();
+        });
+
+        // Close the dropdown when clicking outside for each filter
+        $(document).click(function (event) {
+            if (!$(event.target).hasClass("search-input") && !$(event.target).hasClass("dropdown-content")) {
+                closeOtherDropdowns(null);
+            }
+        });
+    });
+
+</script>
